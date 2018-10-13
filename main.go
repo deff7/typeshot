@@ -8,6 +8,7 @@ import (
 	"math"
 	"math/rand"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/faiface/pixel"
@@ -35,6 +36,20 @@ func getWH(rect pixel.Rect) (float64, float64) {
 	return rect.Max.X, rect.Max.Y
 }
 
+func findMeteorIndex(meteors []*meteor, text string) int {
+	for i, m := range meteors {
+		if m.word == text {
+			return i
+		}
+	}
+	return -1
+}
+
+func processInput(input string) (string, bool) {
+	ss := strings.Split(input, " ")
+	return ss[0], len(ss) > 1
+}
+
 func run() {
 	g := newGame()
 
@@ -49,8 +64,9 @@ func run() {
 	}
 
 	var (
-		frames = 0
-		tick   = time.Tick(time.Second)
+		frames  = 0
+		tick    = time.Tick(time.Second)
+		spawner = time.Tick(3 * time.Second)
 	)
 
 	atlas := text.NewAtlas(basicfont.Face7x13, text.ASCII)
@@ -58,8 +74,7 @@ func run() {
 	scoreText := text.New(pixel.V(60, 50), atlas)
 	fmt.Fprintf(scoreText, "Score: %d", 0)
 
-	m := g.spawnMeteor()
-	m.initText(atlas)
+	meteors := []*meteor{}
 
 	angle := 0.0
 
@@ -71,20 +86,36 @@ func run() {
 		win.Clear(colornames.Black)
 
 		g.drawBackground(win)
-		angle = math.Atan(-(m.pos.X - g.playerPos.X) / (m.pos.Y - g.playerPos.Y))
+
+		mIdx := findMeteorIndex(meteors, g.current)
+		if mIdx != -1 {
+			m := meteors[mIdx]
+			angle = math.Atan(-(m.pos.X - g.playerPos.X) / (m.pos.Y - g.playerPos.Y))
+		}
 		g.drawPlayer(win, angle)
-		g.drawMeteor(win, m)
+
+		for _, m := range meteors {
+			g.drawMeteor(win, m)
+			m.update(dt)
+		}
 
 		g.drawCurrentInput(win, atlas)
 		scoreText.Draw(win, pixel.IM.Scaled(scoreText.Orig, 2))
 
-		g.current += win.Typed()
+		var shot bool
+		g.current, shot = processInput(g.current + win.Typed())
+		if shot {
+			g.current = ""
+		}
 
-		m.update(dt)
 		win.Update()
 
 		frames++
 		select {
+		case <-spawner:
+			m := g.spawnMeteor()
+			m.initText(atlas)
+			meteors = append(meteors, m)
 		case <-tick:
 			win.SetTitle(fmt.Sprintf("%s | FPS: %d", cfg.Title, frames))
 			frames = 0
