@@ -37,12 +37,15 @@ func getWH(rect pixel.Rect) (float64, float64) {
 }
 
 func findMeteor(meteors map[*meteor]bool, text string) *meteor {
+	var nearest *meteor = nil
 	for m, _ := range meteors {
 		if m.word == text {
-			return m
+			if nearest == nil || m.pos.Y < nearest.pos.Y {
+				nearest = m
+			}
 		}
 	}
-	return nil
+	return nearest
 }
 
 func processInput(input string) (string, bool) {
@@ -56,6 +59,19 @@ func angleBetweenVecs(v1, v2 pixel.Vec) float64 {
 
 func distantionBetweenVecs(v1, v2 pixel.Vec) float64 {
 	return math.Sqrt(math.Pow(v2.X-v1.X, 2) + math.Pow(v2.Y-v1.Y, 2))
+}
+
+func animTowards(src, dest, speed float64) float64 {
+	if math.Abs(src-dest) <= speed {
+		return dest
+	}
+
+	if src < dest {
+		src += speed
+	} else {
+		src -= speed
+	}
+	return src
 }
 
 func run() {
@@ -86,6 +102,7 @@ func run() {
 	beams := map[*beam]bool{}
 
 	angle := 0.0
+	angleDest := 0.0
 
 	last := time.Now()
 	for !win.Closed() {
@@ -98,9 +115,9 @@ func run() {
 
 		met := findMeteor(meteors, g.current)
 		if met != nil {
-			angle = angleBetweenVecs(met.pos, g.playerPos)
+			angleDest = angleBetweenVecs(met.pos, g.playerPos)
 		}
-		g.drawPlayer(win, angle)
+		angle = animTowards(angle, angleDest, 0.06)
 
 		for m, _ := range meteors {
 			if m.dead {
@@ -122,6 +139,7 @@ func run() {
 			}
 			b.update(dt)
 		}
+		g.drawPlayer(win, angle)
 
 		g.drawCurrentInput(win, atlas)
 
