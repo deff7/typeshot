@@ -117,8 +117,10 @@ func run() {
 		met := findMeteor(meteors, g.current)
 		if met != nil {
 			angleDest = angleBetweenVecs(met.pos, g.playerPos)
+		} else {
+			angleDest = 0
 		}
-		angle = animTowards(angle, angleDest, 0.06)
+		angle = animTowards(angle, angleDest, 0.09)
 
 		for m, _ := range meteors {
 			if m.dead {

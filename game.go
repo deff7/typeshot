@@ -18,6 +18,8 @@ type game struct {
 	dictIndicies []int
 	dictIdx      int
 
+	bgParallax float64
+
 	currentText *text.Text
 }
 
@@ -48,15 +50,20 @@ func (g *game) loadSprites() {
 }
 
 func (g *game) drawBackground(target pixel.Target) {
-	m := pixel.IM
 
 	s := g.sprites["bg"]
 	w, h := getWH(s.Frame())
+	m := pixel.IM.Moved(pixel.V(0, -g.bgParallax*h))
 
-	for y := 0.0; y < g.winH; y += h {
+	for y := -h; y < g.winH+h; y += h {
 		for x := 0.0; x < g.winW; x += w {
 			s.Draw(target, m.Moved(pixel.Vec{x, y}))
 		}
+	}
+
+	g.bgParallax += 0.005
+	if g.bgParallax > 1 {
+		g.bgParallax = 0
 	}
 }
 
