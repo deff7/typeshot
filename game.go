@@ -1,14 +1,19 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/faiface/pixel"
+	"github.com/faiface/pixel/text"
 )
 
 type game struct {
 	sprites    map[string]*pixel.Sprite
 	winW, winH float64
+	current    string
+
+	currentText *text.Text
 }
 
 func newGame() *game {
@@ -16,6 +21,10 @@ func newGame() *game {
 	g.sprites = map[string]*pixel.Sprite{}
 	g.loadSprites()
 	return g
+}
+
+func (g *game) initText(atlas *text.Atlas) {
+	g.currentText = text.New(pixel.ZV, atlas)
 }
 
 func (g *game) loadSprites() {
@@ -53,4 +62,13 @@ func (g *game) drawMeteor(target pixel.Target, m *meteor) {
 	mat := pixel.IM.Moved(m.pos)
 	s.Draw(target, mat)
 	m.text.Draw(target, mat.Moved(pixel.V(0, h/2+5)))
+}
+
+func (g *game) drawCurrentInput(target pixel.Target, atlas *text.Atlas) {
+	g.currentText.Dot.X -= g.currentText.BoundsOf(g.current).W()/2 + 2
+	fmt.Fprint(g.currentText, g.current)
+	mat := pixel.IM.Scaled(g.currentText.Orig, 2)
+	mat = mat.Moved(pixel.V(g.winW/2, 5))
+	g.currentText.Draw(target, mat)
+	g.currentText.Clear()
 }

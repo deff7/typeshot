@@ -53,11 +53,13 @@ func run() {
 	)
 
 	atlas := text.NewAtlas(basicfont.Face7x13, text.ASCII)
+	g.initText(atlas)
 	scoreText := text.New(pixel.V(60, 50), atlas)
 	fmt.Fprintf(scoreText, "Score: %d", 0)
 
 	m := g.spawnMeteor()
 	m.initText(atlas)
+
 	last := time.Now()
 	for !win.Closed() {
 		dt := time.Since(last).Seconds()
@@ -68,7 +70,11 @@ func run() {
 		g.drawBackground(win)
 		g.drawPlayer(win)
 		g.drawMeteor(win, m)
+
+		g.drawCurrentInput(win, atlas)
 		scoreText.Draw(win, pixel.IM.Scaled(scoreText.Orig, 2))
+
+		g.current += win.Typed()
 
 		m.update(dt)
 		win.Update()
