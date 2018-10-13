@@ -5,6 +5,7 @@ import (
 	"image"
 	_ "image/png"
 	"log"
+	"math"
 	"math/rand"
 	"os"
 	"time"
@@ -60,6 +61,8 @@ func run() {
 	m := g.spawnMeteor()
 	m.initText(atlas)
 
+	angle := 0.0
+
 	last := time.Now()
 	for !win.Closed() {
 		dt := time.Since(last).Seconds()
@@ -68,7 +71,8 @@ func run() {
 		win.Clear(colornames.Black)
 
 		g.drawBackground(win)
-		g.drawPlayer(win)
+		angle = math.Atan(-(m.pos.X - g.playerPos.X) / (m.pos.Y - g.playerPos.Y))
+		g.drawPlayer(win, angle)
 		g.drawMeteor(win, m)
 
 		g.drawCurrentInput(win, atlas)

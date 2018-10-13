@@ -12,6 +12,7 @@ type game struct {
 	sprites    map[string]*pixel.Sprite
 	winW, winH float64
 	current    string
+	playerPos  pixel.Vec
 
 	currentText *text.Text
 }
@@ -20,6 +21,7 @@ func newGame() *game {
 	g := &game{winW: 800, winH: 600}
 	g.sprites = map[string]*pixel.Sprite{}
 	g.loadSprites()
+	g.playerPos = pixel.Vec{g.winW / 2, g.sprites["player"].Frame().Max.Y}
 	return g
 }
 
@@ -50,10 +52,11 @@ func (g *game) drawBackground(target pixel.Target) {
 	}
 }
 
-func (g *game) drawPlayer(target pixel.Target) {
+func (g *game) drawPlayer(target pixel.Target, angle float64) {
 	s := g.sprites["player"]
-	m := pixel.IM.Moved(pixel.Vec{g.winW / 2, s.Frame().Max.Y})
-	s.Draw(target, m)
+	mat := pixel.IM.Rotated(pixel.ZV, angle)
+	mat = mat.Moved(g.playerPos)
+	s.Draw(target, mat)
 }
 
 func (g *game) drawMeteor(target pixel.Target, m *meteor) {

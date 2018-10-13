@@ -27,7 +27,7 @@ func (g *game) spawnMeteor() *meteor {
 	m := &meteor{
 		word:  generateWord(),
 		pos:   g.generatePosition(w, h),
-		speed: 20,
+		speed: 30,
 	}
 	return m
 }
