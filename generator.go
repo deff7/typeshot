@@ -18,8 +18,7 @@ func generateWord() string {
 }
 
 func (g *game) generatePosition(w, h float64) pixel.Vec {
-	half := w / 2
-	x := half + rand.Float64()*(g.winW-half)
+	x := w/2 + rand.Float64()*(g.winW-w)
 	return pixel.Vec{x, g.winH - h/2}
 }
 

@@ -11,7 +11,9 @@ import (
 
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
+	"github.com/faiface/pixel/text"
 	"golang.org/x/image/colornames"
+	"golang.org/x/image/font/basicfont"
 )
 
 func loadPicture(path string) (pixel.Picture, error) {
@@ -50,7 +52,12 @@ func run() {
 		tick   = time.Tick(time.Second)
 	)
 
+	atlas := text.NewAtlas(basicfont.Face7x13, text.ASCII)
+	scoreText := text.New(pixel.V(60, 50), atlas)
+	fmt.Fprintf(scoreText, "Score: %d", 0)
+
 	m := g.spawnMeteor()
+	m.initText(atlas)
 	last := time.Now()
 	for !win.Closed() {
 		dt := time.Since(last).Seconds()
@@ -60,10 +67,12 @@ func run() {
 
 		g.drawBackground(win)
 		g.drawPlayer(win)
-		g.drawMeteor(win, m.pos)
-		m.update(dt)
+		g.drawMeteor(win, m)
+		scoreText.Draw(win, pixel.IM.Scaled(scoreText.Orig, 2))
 
+		m.update(dt)
 		win.Update()
+
 		frames++
 		select {
 		case <-tick:
