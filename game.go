@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"math"
 
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/text"
@@ -30,7 +31,7 @@ func (g *game) initText(atlas *text.Atlas) {
 }
 
 func (g *game) loadSprites() {
-	for _, name := range []string{"bg", "player", "meteor"} {
+	for _, name := range []string{"bg", "player", "meteor", "beam"} {
 		pic, err := loadPicture("data/" + name + ".png")
 		if err != nil {
 			log.Fatal(err)
@@ -74,4 +75,14 @@ func (g *game) drawCurrentInput(target pixel.Target, atlas *text.Atlas) {
 	mat = mat.Moved(pixel.V(g.winW/2, 5))
 	g.currentText.Draw(target, mat)
 	g.currentText.Clear()
+}
+
+func (g *game) drawBeam(target pixel.Target, b *beam) {
+	s := g.sprites["beam"]
+	x := math.Cos(b.angle+math.Pi/2) * b.speed * b.curTime
+	y := math.Sin(b.angle+math.Pi/2) * b.speed * b.curTime
+	mat := pixel.IM.Rotated(pixel.ZV, b.angle)
+	mat = mat.Moved(g.playerPos)
+	mat = mat.Moved(pixel.V(x, y))
+	s.Draw(target, mat)
 }

@@ -22,3 +22,8 @@ func (m *meteor) initText(atlas *text.Atlas) {
 	m.text.Dot.X -= m.text.BoundsOf(m.word).W() / 2
 	m.text.Write([]byte(m.word))
 }
+
+func (m *meteor) destroy() {
+	m.text.Clear()
+	m.text.Write([]byte("BANG"))
+}

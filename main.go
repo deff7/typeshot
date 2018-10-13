@@ -50,6 +50,14 @@ func processInput(input string) (string, bool) {
 	return ss[0], len(ss) > 1
 }
 
+func angleBetweenVecs(v1, v2 pixel.Vec) float64 {
+	return math.Atan(-(v1.X - v2.X) / (v1.Y - v2.Y))
+}
+
+func distantionBetweenVecs(v1, v2 pixel.Vec) float64 {
+	return math.Sqrt(math.Pow(v2.X-v1.X, 2) + math.Pow(v2.Y-v1.Y, 2))
+}
+
 func run() {
 	g := newGame()
 
@@ -66,7 +74,7 @@ func run() {
 	var (
 		frames  = 0
 		tick    = time.Tick(time.Second)
-		spawner = time.Tick(3 * time.Second)
+		spawner = time.Tick(2 * time.Second)
 	)
 
 	atlas := text.NewAtlas(basicfont.Face7x13, text.ASCII)
@@ -75,6 +83,7 @@ func run() {
 	fmt.Fprintf(scoreText, "Score: %d", 0)
 
 	meteors := []*meteor{}
+	beams := []*beam{}
 
 	angle := 0.0
 
@@ -90,7 +99,7 @@ func run() {
 		mIdx := findMeteorIndex(meteors, g.current)
 		if mIdx != -1 {
 			m := meteors[mIdx]
-			angle = math.Atan(-(m.pos.X - g.playerPos.X) / (m.pos.Y - g.playerPos.Y))
+			angle = angleBetweenVecs(m.pos, g.playerPos)
 		}
 		g.drawPlayer(win, angle)
 
@@ -99,12 +108,24 @@ func run() {
 			m.update(dt)
 		}
 
+		for _, b := range beams {
+			if b.curTime < b.lifetime {
+				g.drawBeam(win, b)
+			}
+			b.update(dt)
+		}
+
 		g.drawCurrentInput(win, atlas)
 		scoreText.Draw(win, pixel.IM.Scaled(scoreText.Orig, 2))
 
 		var shot bool
 		g.current, shot = processInput(g.current + win.Typed())
-		if shot {
+		if shot || win.JustPressed(pixelgl.KeyEnter) {
+			if mIdx != -1 {
+				println(len(beams))
+				b := newBeam(g.playerPos, meteors[mIdx])
+				beams = append(beams, b)
+			}
 			g.current = ""
 		}
 
