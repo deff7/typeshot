@@ -10,10 +10,13 @@ import (
 )
 
 type game struct {
-	sprites    map[string]*pixel.Sprite
-	winW, winH float64
-	current    string
-	playerPos  pixel.Vec
+	sprites      map[string]*pixel.Sprite
+	winW, winH   float64
+	current      string
+	playerPos    pixel.Vec
+	dictionary   []string
+	dictIndicies []int
+	dictIdx      int
 
 	currentText *text.Text
 }
@@ -22,6 +25,10 @@ func newGame() *game {
 	g := &game{winW: 800, winH: 600}
 	g.sprites = map[string]*pixel.Sprite{}
 	g.loadSprites()
+	err := g.loadDictionary("data/words.txt")
+	if err != nil {
+		log.Fatal(err)
+	}
 	g.playerPos = pixel.Vec{g.winW / 2, g.sprites["player"].Frame().Max.Y}
 	return g
 }
