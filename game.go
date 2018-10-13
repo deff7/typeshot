@@ -63,8 +63,10 @@ func (g *game) drawPlayer(target pixel.Target, angle float64) {
 func (g *game) drawMeteor(target pixel.Target, m *meteor) {
 	s := g.sprites["meteor"]
 	_, h := getWH(s.Frame())
-	mat := pixel.IM.Moved(m.pos)
+	mat := pixel.IM.Rotated(pixel.ZV, m.angle)
+	mat = mat.Moved(m.pos)
 	s.Draw(target, mat)
+	mat = pixel.IM.Moved(m.pos)
 	m.text.Draw(target, mat.Moved(pixel.V(0, h/2+5)))
 }
 

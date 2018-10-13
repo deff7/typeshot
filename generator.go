@@ -1,6 +1,7 @@
 package main
 
 import (
+	"math"
 	"math/rand"
 
 	"github.com/faiface/pixel"
@@ -27,6 +28,7 @@ func (g *game) spawnMeteor() *meteor {
 	m := &meteor{
 		word:  generateWord(),
 		pos:   g.generatePosition(w, h),
+		angle: rand.Float64() * 2 * math.Pi,
 		speed: 30,
 	}
 	return m

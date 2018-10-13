@@ -12,7 +12,6 @@ type meteor struct {
 	word  string
 	speed float64
 	angle float64
-	dead  bool
 
 	text *text.Text
 }
@@ -32,5 +31,6 @@ func (m *meteor) initText(atlas *text.Atlas) {
 }
 
 func (m *meteor) destroy() {
-	m.dead = true
+	m.text.Clear()
+	m.text.Write([]byte("BANG"))
 }

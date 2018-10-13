@@ -36,13 +36,13 @@ func getWH(rect pixel.Rect) (float64, float64) {
 	return rect.Max.X, rect.Max.Y
 }
 
-func findMeteorIndex(meteors []*meteor, text string) int {
-	for i, m := range meteors {
+func findMeteor(meteors map[*meteor]bool, text string) *meteor {
+	for m, _ := range meteors {
 		if m.word == text {
-			return i
+			return m
 		}
 	}
-	return -1
+	return nil
 }
 
 func processInput(input string) (string, bool) {
@@ -79,11 +79,11 @@ func run() {
 
 	atlas := text.NewAtlas(basicfont.Face7x13, text.ASCII)
 	g.initText(atlas)
+	score := 0
 	scoreText := text.New(pixel.V(60, 50), atlas)
-	fmt.Fprintf(scoreText, "Score: %d", 0)
 
-	meteors := []*meteor{}
-	beams := []*beam{}
+	meteors := map[*meteor]bool{}
+	beams := map[*beam]bool{}
 
 	angle := 0.0
 
@@ -96,19 +96,27 @@ func run() {
 
 		g.drawBackground(win)
 
-		mIdx := findMeteorIndex(meteors, g.current)
-		if mIdx != -1 {
-			m := meteors[mIdx]
-			angle = angleBetweenVecs(m.pos, g.playerPos)
+		met := findMeteor(meteors, g.current)
+		if met != nil {
+			angle = angleBetweenVecs(met.pos, g.playerPos)
 		}
 		g.drawPlayer(win, angle)
 
-		for _, m := range meteors {
+		for m, _ := range meteors {
+			if m.dead {
+				score++
+				delete(meteors, m)
+				continue
+			}
 			g.drawMeteor(win, m)
 			m.update(dt)
 		}
 
-		for _, b := range beams {
+		for b, _ := range beams {
+			if b.dead {
+				delete(beams, b)
+				continue
+			}
 			if b.curTime < b.lifetime {
 				g.drawBeam(win, b)
 			}
@@ -116,15 +124,17 @@ func run() {
 		}
 
 		g.drawCurrentInput(win, atlas)
+
+		scoreText.Clear()
+		fmt.Fprintf(scoreText, "Score: %d", score)
 		scoreText.Draw(win, pixel.IM.Scaled(scoreText.Orig, 2))
 
 		var shot bool
 		g.current, shot = processInput(g.current + win.Typed())
 		if shot || win.JustPressed(pixelgl.KeyEnter) {
-			if mIdx != -1 {
-				println(len(beams))
-				b := newBeam(g.playerPos, meteors[mIdx])
-				beams = append(beams, b)
+			if met != nil {
+				b := newBeam(g.playerPos, met)
+				beams[b] = true
 			}
 			g.current = ""
 		}
@@ -136,7 +146,7 @@ func run() {
 		case <-spawner:
 			m := g.spawnMeteor()
 			m.initText(atlas)
-			meteors = append(meteors, m)
+			meteors[m] = true
 		case <-tick:
 			win.SetTitle(fmt.Sprintf("%s | FPS: %d", cfg.Title, frames))
 			frames = 0

@@ -9,6 +9,7 @@ type beam struct {
 	angle    float64
 	lifetime float64
 	curTime  float64
+	dead     bool
 
 	target *meteor
 }
@@ -26,6 +27,7 @@ func newBeam(playerPos pixel.Vec, target *meteor) *beam {
 func (b *beam) update(dt float64) {
 	b.curTime += dt
 	if b.curTime > b.lifetime {
+		b.dead = true
 		b.target.destroy()
 	}
 }
