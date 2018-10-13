@@ -1,10 +1,13 @@
 package main
 
 import (
+	"fmt"
 	"image"
 	_ "image/png"
 	"log"
+	"math/rand"
 	"os"
+	"time"
 
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
@@ -42,17 +45,36 @@ func run() {
 		log.Fatal(err)
 	}
 
-	win.Clear(colornames.Black)
+	var (
+		frames = 0
+		tick   = time.Tick(time.Second)
+	)
 
-	g.drawBackground(win)
-	g.drawPlayer(win)
-	g.drawMeteor(win, win.Bounds().Center())
-
+	m := g.spawnMeteor()
+	last := time.Now()
 	for !win.Closed() {
+		dt := time.Since(last).Seconds()
+		last = time.Now()
+
+		win.Clear(colornames.Black)
+
+		g.drawBackground(win)
+		g.drawPlayer(win)
+		g.drawMeteor(win, m.pos)
+		m.update(dt)
+
 		win.Update()
+		frames++
+		select {
+		case <-tick:
+			win.SetTitle(fmt.Sprintf("%s | FPS: %d", cfg.Title, frames))
+			frames = 0
+		default:
+		}
 	}
 }
 
 func main() {
+	rand.Seed(int64(time.Now().Second()))
 	pixelgl.Run(run)
 }
