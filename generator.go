@@ -54,13 +54,13 @@ func (g *game) generatePosition(w, h float64) pixel.Vec {
 	return pixel.Vec{x, g.winH - h/2}
 }
 
-func (g *game) spawnMeteor() *meteor {
+func (g *game) spawnMeteor(gameSpeed float64) *meteor {
 	w, h := getWH(g.sprites["meteor"].Frame())
 	m := &meteor{
 		word:  g.generateWord(),
 		pos:   g.generatePosition(w, h),
 		angle: rand.Float64() * 2 * math.Pi,
-		speed: 30,
+		speed: 30 * gameSpeed,
 	}
 	return m
 }

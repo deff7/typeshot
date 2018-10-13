@@ -76,6 +76,7 @@ func animTowards(src, dest, speed float64) float64 {
 
 func run() {
 	g := newGame()
+	gameSpeed := 1.0
 
 	cfg := pixelgl.WindowConfig{
 		Title:  "Typeshot",
@@ -167,11 +168,12 @@ func run() {
 		frames++
 		select {
 		case <-spawner:
-			m := g.spawnMeteor()
+			m := g.spawnMeteor(gameSpeed)
 			m.initText(atlas)
 			meteors[m] = true
 		case <-tick:
-			win.SetTitle(fmt.Sprintf("%s | FPS: %d", cfg.Title, frames))
+			gameSpeed += 0.05
+			win.SetTitle(fmt.Sprintf("%s | FPS: %d | spd: %f", cfg.Title, frames, gameSpeed))
 			frames = 0
 		default:
 		}
