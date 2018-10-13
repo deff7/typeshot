@@ -138,6 +138,11 @@ func run() {
 			}
 			g.current = ""
 		}
+		if win.JustPressed(pixelgl.KeyBackspace) {
+			if len(g.current) > 0 {
+				g.current = g.current[:len(g.current)-1]
+			}
+		}
 
 		win.Update()
 
