@@ -46,3 +46,8 @@ func (g *game) drawPlayer(target pixel.Target) {
 	m := pixel.IM.Moved(pixel.Vec{g.winW / 2, s.Frame().Max.Y})
 	s.Draw(target, m)
 }
+
+func (g *game) drawMeteor(target pixel.Target, vec pixel.Vec) {
+	s := g.sprites["meteor"]
+	s.Draw(target, pixel.IM.Moved(vec))
+}

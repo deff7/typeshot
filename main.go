@@ -46,6 +46,7 @@ func run() {
 
 	g.drawBackground(win)
 	g.drawPlayer(win)
+	g.drawMeteor(win, win.Bounds().Center())
 
 	for !win.Closed() {
 		win.Update()
